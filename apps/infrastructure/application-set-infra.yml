@@ -13,15 +13,12 @@ spec:
     - list:
         elements:
           - name: longhorn
-            valueFiles: charts/longhorn/env/production/longhorn-defaults.yml
-            syncWave: '0'
-            namespace: longhorn-system
+            valueFiles: env/production/longhorn-defaults.yml
+            namespace: longhorn
             environment: production
   template:
     metadata:
       name: '{{name}}-{{environment}}'
-      annotations:
-        argocd.argoproj.io/sync-wave: '{{syncWave}}'
     spec:
       project: default
       source:
