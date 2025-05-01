@@ -184,8 +184,10 @@ operator:
   # These settings can control the minimum and maximum resources requested for each pod.
   # If no worker nodes can meet the specified requests, the Operator may fail to deploy.
   resources:
-    requests:
+    cpu: 100m
+    memory: 128Mi
+    ephemeral-storage: 500Mi
+    limits:
       cpu: 200m
       memory: 256Mi
       ephemeral-storage: 500Mi
-

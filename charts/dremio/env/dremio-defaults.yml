@@ -38,8 +38,8 @@ coordinator:
   # CPU & Memory
   # Memory allocated to each coordinator, expressed in MB.
   # CPU allocated to each coordinator, expressed in CPU cores.
-  cpu: 15
-  memory: 122800
+  cpu: 1
+  memory: 4096
 
   # This count is used for slave coordinators only.
   # The total number of coordinators will always be count + 1.
@@ -50,7 +50,7 @@ coordinator:
   # Coordinator data volume size (applies to the master coordinator only).
   # In most managed Kubernetes environments (AKS, GKE, etc.), the size of the disk has a direct impact on
   # the provisioned and maximum performance of the disk.
-  volumeSize: 512Gi
+  volumeSize: 3Gi
 
   # Kubernetes Service Account
   # Uncomment below to use a custom Kubernetes service account for the coordinator.
@@ -158,17 +158,17 @@ executor:
   # CPU & Memory
   # Memory allocated to each executor, expressed in MB.
   # CPU allocated to each executor, expressed in CPU cores.
-  cpu: 15
-  memory: 122800
+  cpu: 1
+  memory: 4096
 
   # Engines
   # Engine names be 47 characters or less and be lowercase alphanumber characters or '-'.
   # Note: The number of executor pods will be the length of the array below * count.
   engines: ["default"]
-  count: 3
+  count: 1
 
   # Executor volume size.
-  volumeSize: 128Gi
+  volumeSize: 3Gi
 
   # Kubernetes Service Account
   # Uncomment below to use a custom Kubernetes service account for executors.
@@ -226,7 +226,7 @@ executor:
     #   size: 100Gi
     #   storageClass: "local-nvme"
     volumes:
-    - size: 100Gi
+    - size: 1Gi
 
   # These values, when defined and not empty, override the provided shared annotations, labels, node selectors, or tolerations.
   # Uncomment only if you are trying to override the chart's shared values.
@@ -334,9 +334,9 @@ zookeeper:
   # CPU allocated to each zookeeper, expressed in CPU cores.
   cpu: 0.5
   memory: 1024
-  count: 3
+  count: 1
 
-  volumeSize: 10Gi
+  volumeSize: 1Gi
 
   # Kubernetes Service Account
   # Uncomment below to use a custom Kubernetes service account for Zookeeper.
@@ -364,7 +364,7 @@ distStorage:
   # azure: ADLS Gen 1, additional parameters required, see "azure" section.
   # azureStorage: Azure Storage Gen2, additional parameters required, see "azureStorage" section.
   # gcp: Google Cloud Storage, additional parameters required, see "gcp" section.
-  type: "local"
+  type: "aws"
 
   # Google Cloud Storage
   #
@@ -414,15 +414,15 @@ distStorage:
   #       Dremio does not support using an K8s service account based IAM role.
   # credentials: If using accessKeySecret authentication, uncomment the credentials section below.
   aws:
-    bucketName: "AWS Bucket Name"
+    bucketName: "dremio"
     path: "/"
-    authentication: "metadata"
+    authentication: "accessKeySecret"
     # If using accessKeySecret for authentication against S3, uncomment the lines below and use the values
     # to configure the appropriate credentials.
     #
-    #credentials:
-    #  accessKey: "AWS Access Key"
-    #  secret: "AWS Secret"
+    credentials:
+      accessKey: "Hcbo4HK4iFLoAuqt8p6d"
+      secret: "15DL8GPUX287c3sheASkglXVkj0zxyupityh3LmM"
     #
     # If using awsProfile for authentication against S3, uncomment the lines below and use the values
     # to choose the appropriate profile.
@@ -434,11 +434,27 @@ distStorage:
     # Use the extra properties block to provide additional parameters to configure the distributed
     # storage in the generated core-site.xml file.
     #
-    #extraProperties: |
-    #  <property>
-    #    <name></name>
-    #    <value></value>
-    #  </property>
+    extraProperties: |
+      <property>
+        <name>fs.s3a.endpoint</name>
+        <value>local-minio-tenant-hl.local-minio-tenant.svc.cluster.local:9000</value>
+      </property>
+      <property>
+        <name>fs.s3a.endpoint.region</name>
+        <value>local</value>
+      </property>
+      <property>
+        <name>fs.s3a.path.style.access</name>
+        <value>true</value>
+      </property>
+      <property>
+        <name>dremio.s3.compat</name>
+        <value>true</value>
+      </property>
+      <property>
+        <name>fs.s3a.connection.ssl.enabled</name>
+        <value>false</value>
+      </property>
 
   # Azure ADLS Gen 1
   # For more details of Azure ADLS Gen 1 storage configuration, see
@@ -525,7 +541,19 @@ extraVolumeMounts: []
 
 # Extra Environment Variables
 # Array to add extra environment variables to Dremio's pods
-extraEnvs: []
+extraEnvs:
+  - name: AWS_ACCESS_KEY_ID
+    value: Hcbo4HK4iFLoAuqt8p6d
+  - name: AWS_SECRET_ACCESS_KEY
+    value: 15DL8GPUX287c3sheASkglXVkj0zxyupityh3LmM
+  - name: AWS_ENDPOINT
+    value: local-minio-tenant-hl.local-minio-tenant.svc.cluster.local:9000
+  - name: AWS_REGION
+    value: local
+  - name: AWS_S3_USE_HTTPS
+    value: "0"
+  - name: AWS_S3_ADDRESSING_STYLE
+    value: path
 
 # Whether to write logs to a file on disk for all Dremio resources. Disabled by default.
 # When enabled, log messages are logged to the console and written to a persistent volume mounted at /opt/dremio/log.
@@ -559,7 +587,7 @@ service:
 
 # To use custom storage class, uncomment below.
 # Otherwise the default storage class configured for your K8s cluster is used.
-#storageClass: managed-premium
+storageClass: csi-hostpath-sc
 
 # For private and protected docker image repository, you should store
 # the credentials in a kubernetes secret and provide the secret name

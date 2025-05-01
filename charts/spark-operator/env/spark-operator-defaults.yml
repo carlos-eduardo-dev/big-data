@@ -118,7 +118,7 @@ controller:
   # Create a tmp directory to write Spark artifacts to for deployed Spark apps.
   - name: tmp
     emptyDir:
-      sizeLimit: 1Gi
+      sizeLimit: 3Gi
 
   # -- Node selector for controller pods.
   nodeSelector: {}

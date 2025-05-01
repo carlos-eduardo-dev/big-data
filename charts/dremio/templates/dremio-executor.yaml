@@ -73,6 +73,7 @@ spec:
             -Dservices.coordinator.master.embedded-zookeeper.enabled=false
             -Dservices.executor.enabled=true
             -Dservices.conduit.port=45679
+            -Dcom.amazonaws.sdk.disableCertChecking=true
             -Dservices.node-tag={{ $engineName }}
             -XX:ActiveProcessorCount={{ include "dremio.executor.activeProcessorCount" (list $ $engineName) }}
         - name: AWS_CREDENTIAL_PROFILES_FILE

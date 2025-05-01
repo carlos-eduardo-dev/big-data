@@ -1,0 +1,4 @@
+*.img
+
+infra/.terraform*
+infra/terraform.*

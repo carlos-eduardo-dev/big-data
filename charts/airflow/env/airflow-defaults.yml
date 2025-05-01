@@ -19,8 +19,8 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-global:
-  storageClass: csi-hostpath-sc
+#global:
+#  storageClass: longhorn
 
 # Provide a name to substitute for the full names of resources
 fullnameOverride: ""
@@ -392,7 +392,10 @@ priorityClasses: []
 #    * key (templated) is the name of the secret that will be created
 #    * value: an object with the standard 'data' or 'stringData' key (or both).
 #          The value associated with those keys must be a string (templated)
-extraSecrets: {}
+extraSecrets:
+  airflow-database-connection:
+    stringData: |
+      connection: "postgresql://{{ (lookup "v1" "Secret" "airflow" "airflow.airflow.credentials.postgresql.acid.zalan.do").data.username | b64dec }}:{{ (lookup "v1" "Secret" "airflow" "airflow.airflow.credentials.postgresql.acid.zalan.do").data.password | b64dec }}@airflow.airflow.svc.cluster.local:5432/airflow"
 # eg:
 # extraSecrets:
 #   '{{ .Release.Name }}-airflow-connections':
@@ -461,26 +464,26 @@ data:
   # data:
   #   connection: base64_encoded_connection_string
 
-  metadataSecretName: ~
+  metadataSecretName: airflow-database-connection
   # When providing secret names and using the same database for metadata and
   # result backend, for Airflow < 2.4.0 it is necessary to create a separate
   # secret for result backend but with a db+ scheme prefix.
   # For Airflow >= 2.4.0 it is possible to not specify the secret again,
   # as Airflow will use sql_alchemy_conn with a db+ scheme prefix by default.
-  resultBackendSecretName: ~
+  resultBackendSecretName: airflow-database-connection
   brokerUrlSecretName: ~
 
   # Otherwise pass connection values in
-  metadataConnection:
-    user: postgres
-    pass: postgres
-    protocol: postgresql
-    host: ~
-    port: 5432
-    db: postgres
-    sslmode: disable
+#  metadataConnection:
+#    user: postgres
+#    pass: postgres
+#    protocol: postgresql
+#    host: ~
+#    port: 5432
+#    db: postgres
+#    sslmode: disable
   # resultBackendConnection defaults to the same database as metadataConnection
-  resultBackendConnection: ~
+#  resultBackendConnection: ~
   # or, you can use a different database
   # resultBackendConnection:
   #   user: postgres
@@ -702,7 +705,7 @@ workers:
     # Volume size for worker StatefulSet
     size: 5Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
-    storageClassName: csi-hostpath-sc
+    storageClassName: longhorn
     # Execute init container to chown log directory.
     # This is currently only needed in kind, due to usage
     # of local-path provisioner.
@@ -843,7 +846,7 @@ workers:
 
   waitForMigrations:
     # Whether to create init container to wait for db migrations
-    enabled: true
+    enabled: false
     env: []
     # Detailed default security context for waitForMigrations for container level
     securityContexts:
@@ -1052,7 +1055,7 @@ scheduler:
 
   waitForMigrations:
     # Whether to create init container to wait for db migrations
-    enabled: true
+    enabled: false
     env: []
     # Detailed default security context for waitForMigrations for container level
     securityContexts:
@@ -1312,7 +1315,7 @@ apiServer:
 
   waitForMigrations:
     # Whether to create init container to wait for db migrations
-    enabled: true
+    enabled: false
     env: []
     # Detailed default security context for waitForMigrations for container level
     securityContexts:
@@ -1592,7 +1595,7 @@ webserver:
 
   waitForMigrations:
     # Whether to create init container to wait for db migrations
-    enabled: true
+    enabled: false
     env: []
     # Detailed default security context for waitForMigrations for container level
     securityContexts:
@@ -1666,7 +1669,7 @@ triggerer:
     # Volume size for triggerer StatefulSet
     size: 5Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
-    storageClassName: csi-hostpath-sc
+    storageClassName: longhorn
     # Execute init container to chown log directory.
     # This is currently only needed in kind, due to usage
     # of local-path provisioner.
@@ -1772,7 +1775,7 @@ triggerer:
 
   waitForMigrations:
     # Whether to create init container to wait for db migrations
-    enabled: true
+    enabled: false
     env: []
     # Detailed default security context for waitForMigrations for container level
     securityContexts:
@@ -1956,7 +1959,7 @@ dagProcessor:
 
   waitForMigrations:
     # Whether to create init container to wait for db migrations
-    enabled: true
+    enabled: false
     env: []
     # Detailed default security context for waitForMigrations for container level
     securityContexts:
@@ -2440,7 +2443,7 @@ redis:
     # Volume size for worker StatefulSet
     size: 1Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
-    storageClassName: csi-hostpath-sc
+    storageClassName: longhorn
     # Annotations to add to redis volumes
     annotations: {}
     # the name of an existing PVC to use
@@ -2632,7 +2635,7 @@ cleanup:
 # Configuration for postgresql subchart
 # Not recommended for production
 postgresql:
-  enabled: true
+  enabled: false
   auth:
     enablePostgresUser: true
     postgresPassword: postgres
@@ -2669,6 +2672,7 @@ config:
     statsd_host: '{{ printf "%s-statsd" (include "airflow.fullname" .) }}'
   webserver:
     enable_proxy_fix: 'True'
+    expose_config: 'True'
     # For Airflow 1.10
     rbac: 'True'
   celery:
@@ -2760,7 +2764,7 @@ dags:
     # Volume size for dags
     size: 1Gi
     # If using a custom storageClass, pass name here
-    storageClassName: csi-hostpath-sc
+    storageClassName: longhorn
     # access mode of the persistent volume
     accessMode: ReadWriteOnce
     ## the name of an existing PVC to use
@@ -2894,7 +2898,7 @@ logs:
     # Annotations for the logs PVC
     annotations: {}
     # If using a custom storageClass, pass name here
-    storageClassName: csi-hostpath-sc
+    storageClassName: longhorn
     ## the name of an existing PVC to use
     existingClaim:
 

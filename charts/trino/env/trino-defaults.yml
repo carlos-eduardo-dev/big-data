@@ -384,12 +384,26 @@ eventListenerProperties: []
 # ```
 
 catalogs:
-  tpch: |
-    connector.name=tpch
-    tpch.splits-per-node=4
-  tpcds: |
-    connector.name=tpcds
-    tpcds.splits-per-node=4
+#  tpch: |
+#    connector.name=tpch
+#    tpch.splits-per-node=4
+#  tpcds: |
+#    connector.name=tpcds
+#    tpcds.splits-per-node=4
+  iceberg: |
+    connector.name=iceberg
+    iceberg.catalog.type=nessie
+    iceberg.nessie-catalog.uri=http://nessie.nessie.svc.cluster.local:19120/api/v1
+    iceberg.nessie-catalog.ref=main
+    iceberg.nessie-catalog.default-warehouse-dir=s3a://imdb/
+    
+    s3.aws-access-key=Hcbo4HK4iFLoAuqt8p6d
+    s3.aws-secret-key=15DL8GPUX287c3sheASkglXVkj0zxyupityh3LmM
+    s3.endpoint=http://local-minio-tenant-hl.local-minio-tenant.svc.cluster.local:9000
+    s3.region=local
+    fs.native-s3.enabled=true
+    s3.path-style-access=true
+
 # catalogs -- Configure
 # [catalogs](https://trino.io/docs/current/installation/deployment.html#catalog-properties).
 # @raw

@@ -1,0 +1,8 @@
+{
+  "minio-connection": {
+    "conn_type": "aws",
+    "login": "minioadmin",
+    "password": "minioadmin",
+    "extra": "{\"endpoint_url\": \"http://local-minio-tenant-hl.local-minio-tenant.svc.cluster.local:9000\"}"
+  }
+}

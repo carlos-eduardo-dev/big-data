@@ -62,7 +62,7 @@ configGeneral:
   #  example: "exampleimage:exampletag"
 
   # number of routines the operator spawns to process requests concurrently
-  workers: 8
+  workers: 4
 
 # parameters describing Postgres users
 configUsers:
