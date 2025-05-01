@@ -8,7 +8,7 @@ spec:
     - list:
         elements:
           - name: longhorn
-            values: /charts/longhorn/env/{{ .environment }}/longhorn-defaults.yml
+            valueFiles: /charts/longhorn/env/{{ .environment }}/longhorn-defaults.yml
             syncWave: '0'
             namespace: longhorn-system
         name: "{{name}}"
@@ -27,7 +27,7 @@ spec:
         path: 'charts/{{name}}'
         helm:
           valueFiles:
-            - '{{values}}'
+            - '{{valueFiles}}'
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{namespace}}'
