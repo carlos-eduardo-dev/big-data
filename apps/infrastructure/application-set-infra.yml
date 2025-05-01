@@ -14,7 +14,7 @@ spec:
         elements:
           - name: longhorn
             valueFiles: env/production/longhorn-defaults.yml
-            namespace: longhorn
+            namespace: longhorn-system
             environment: production
   template:
     metadata:
