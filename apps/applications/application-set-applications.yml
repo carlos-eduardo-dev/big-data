@@ -13,7 +13,7 @@ spec:
     - list:
         elements:
           - name: minio-operator
-            values: /charts/minio-operator/env/production/minio-operator-defaults.yml
+            values: env/production/minio-operator-defaults.yml
             syncWave: '1'
             namespace: minio-operator
             environment: production
