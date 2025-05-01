@@ -50,4 +50,4 @@ fs_setup:
     overwrite: true
 
 mounts:
-  - [ /dev/sdb1, /var/lib/longhorn, "ext4", "defaults,nofail,x-systemd.requires=cloud-init.service", "0", "2" ]
+  - [ /dev/sdb1, /var/lib/longhorn, "ext4", "defaults,nofail", "0", "2" ]
