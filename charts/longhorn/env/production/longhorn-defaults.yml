@@ -476,6 +476,8 @@ namespaceOverride: ""
 annotations: {}
 serviceAccount:
   # -- Annotations to add to the service account
+  create: true
+  name: longhorn-service-account
   annotations: {}
 metrics:
   serviceMonitor:
