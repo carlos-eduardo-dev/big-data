@@ -13,7 +13,7 @@ spec:
     - list:
         elements:
           - name: longhorn
-            valueFiles: /charts/longhorn/env/production/longhorn-defaults.yml
+            valueFiles: charts/longhorn/env/production/longhorn-defaults.yml
             syncWave: '0'
             namespace: longhorn-system
             environment: production
