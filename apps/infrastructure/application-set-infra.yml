@@ -3,20 +3,23 @@ kind: ApplicationSet
 metadata:
   name: infrastructure-applications
   namespace: argo
+  finalizers:
+    # The default behaviour is foreground cascading deletion
+    - resources-finalizer.argocd.argoproj.io
+    # Alternatively, you can use background cascading deletion
+    # - resources-finalizer.argocd.argoproj.io/background
 spec:
   generators:
     - list:
         elements:
           - name: longhorn
-            valueFiles: /charts/longhorn/env/{{ .environment }}/longhorn-defaults.yml
+            valueFiles: /charts/longhorn/env/production/longhorn-defaults.yml
             syncWave: '0'
             namespace: longhorn-system
-        name: "{{name}}"
-        values:
-          - environment: production
+            environment: production
   template:
     metadata:
-      name: '{{name}}-{{.environment}}'
+      name: '{{name}}-{{environment}}'
       annotations:
         argocd.argoproj.io/sync-wave: '{{syncWave}}'
     spec:
