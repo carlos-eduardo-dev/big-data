@@ -17,6 +17,16 @@ provider "libvirt" {
 
 provider "rke" {}
 
+provider "kubernetes" {
+  config_path = local_file.kube_config.filename  # Caminho para o kubeconfig gerado
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = local_file.kube_config.filename  # Referência ao kubeconfig gerado
+  }
+}
+
 resource "libvirt_volume" "vm_disk" {
   count          = var.vm_count
   name = format("${var.cluster_name}-vm-%03d", count.index + 1)
@@ -157,4 +167,51 @@ resource "local_file" "kube_config" {
   file_permission = "600"
   content         = rke_cluster.cluster.kube_config_yaml
   filename = pathexpand(var.kube_config_path)
+}
+
+resource "helm_release" "argo_cd" {
+  depends_on = [rke_cluster.cluster]
+  name             = "argo-cd"
+  namespace        = "argo"
+  create_namespace = true
+  upgrade_install  = true
+  chart            = "../charts/argo-cd"
+
+  values = [
+    "../charts/argo-cd/env/argo-defaults.yml"
+  ]
+}
+
+resource "kubernetes_manifest" "argocd_application" {
+  depends_on = [helm_release.argo_cd]
+
+  manifest = {
+    apiVersion = "argoproj.io/v1alpha1"
+    kind       = "Application"
+    metadata = {
+      name      = "meu-aplicativo"
+      namespace = "argocd"
+    }
+    spec = {
+      project = "default"
+      source = {
+        repoURL        = "https://github.com/carlos-eduardo-dev/big-data"
+        targetRevision = "HEAD"
+        path           = "apps"
+        directory = {
+          recurse = true
+        }
+      }
+      destination = {
+        server    = "https://kubernetes.default.svc"
+        namespace = "argo"
+      }
+      syncPolicy = {
+        automated = {
+          prune    = true
+          selfHeal = true
+        }
+      }
+    }
+  }
 }
