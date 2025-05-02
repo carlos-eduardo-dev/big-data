@@ -13,7 +13,7 @@ spec:
     - list:
         elements:
           - name: minio-operator
-            values: env/production/minio-operator-defaults.yml
+            valueFiles: env/production/minio-operator-defaults.yml
             syncWave: '1'
             namespace: minio-operator
             environment: production
@@ -30,7 +30,7 @@ spec:
         path: 'charts/{{name}}'
         helm:
           valueFiles:
-            - '{{values}}'
+            - '{{valueFiles}}'
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{namespace}}'
