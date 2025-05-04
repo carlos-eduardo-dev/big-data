@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: applications
+  namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
+spec:
+  generators:
+    - list:
+        elements:
+          - name: infrastructure
+            namespace: argo
+            syncWave: '0'
+          - name: applications
+            namespace: argo
+            syncWave: '1'
+  template:
+    metadata:
+      name: "{{name}}"
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/carlos-eduardo-dev/big-data'
+        targetRevision: HEAD
+        path: 'apps/{{name}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

@@ -174,44 +174,9 @@ resource "helm_release" "argo_cd" {
   name             = "argo-cd"
   namespace        = "argo"
   create_namespace = true
-  upgrade_install  = true
   chart            = "../charts/argo-cd"
 
   values = [
-    "../charts/argo-cd/env/argo-defaults.yml"
+    file("../charts/argo-cd/env/argo-defaults.yml")
   ]
-}
-
-resource "kubernetes_manifest" "argocd_application" {
-  depends_on = [helm_release.argo_cd]
-
-  manifest = {
-    apiVersion = "argoproj.io/v1alpha1"
-    kind       = "Application"
-    metadata = {
-      name      = "meu-aplicativo"
-      namespace = "argocd"
-    }
-    spec = {
-      project = "default"
-      source = {
-        repoURL        = "https://github.com/carlos-eduardo-dev/big-data"
-        targetRevision = "HEAD"
-        path           = "apps"
-        directory = {
-          recurse = true
-        }
-      }
-      destination = {
-        server    = "https://kubernetes.default.svc"
-        namespace = "argo"
-      }
-      syncPolicy = {
-        automated = {
-          prune    = true
-          selfHeal = true
-        }
-      }
-    }
-  }
 }
