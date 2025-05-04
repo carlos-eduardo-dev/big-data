@@ -3,11 +3,8 @@ kind: ApplicationSet
 metadata:
   name: business-applications
   namespace: argo
-  finalizers:
-    # The default behaviour is foreground cascading deletion
-    - resources-finalizer.argocd.argoproj.io
-    # Alternatively, you can use background cascading deletion
-    # - resources-finalizer.argocd.argoproj.io/background
+  annotations:
+    argocd.argoproj.io/sync-wave: '1'
 spec:
   generators:
     - list:
@@ -22,8 +19,6 @@ spec:
       name: '{{name}}-{{environment}}'
       annotations:
         argocd.argoproj.io/sync-wave: '{{syncWave}}'
-      finalizers:
-        - resources-finalizer.argocd.argoproj.io
     spec:
       project: default
       source:
