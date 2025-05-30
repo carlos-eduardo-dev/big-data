@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: applications
+  name: infrastructure-applications
   namespace: argo
   annotations:
     argocd.argoproj.io/sync-wave: '0'
@@ -9,25 +9,31 @@ spec:
   generators:
     - list:
         elements:
-          - name: infrastructure
-            namespace: argo
+          - name: longhorn
+            valueFiles: env/production/longhorn-defaults.yml
             syncWave: '0'
-          - name: applications
-            namespace: argo
-            syncWave: '1'
+            namespace: longhorn-system
+            environment: production
   template:
     metadata:
-      name: "{{name}}"
+      name: '{{name}}-{{environment}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{syncWave}}'
     spec:
       project: default
       source:
         repoURL: 'https://github.com/carlos-eduardo-dev/big-data'
         targetRevision: HEAD
-        path: 'apps/{{name}}'
+        path: 'charts/{{name}}'
+        helm:
+          valueFiles:
+            - '{{valueFiles}}'
       destination:
-        server: 'https://kubernetes.default.svc'
+        server: https://kubernetes.default.svc
         namespace: '{{namespace}}'
       syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
         automated:
           prune: true
           selfHeal: true

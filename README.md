@@ -32,6 +32,10 @@ helm upgrade --install longhorn ./charts/longhorn \
 
 - host precisa de ter bin mkisofs
 
+helm upgrade --install redis-operator ./charts/redis-operator \
+--namespace redis-operator --create-namespace \
+--values ./charts/redis-operator/env/redis-operator-defaults.yml
+
 helm upgrade --install postgres-operator ./charts/postgres-operator \
 --namespace postgres-operator --create-namespace \
 --values ./charts/postgres-operator/env/postgres-operator-defaults.yml
@@ -44,3 +48,42 @@ helm upgrade --install argo ./charts/argo-cd \
 --namespace argo --create-namespace \
 --values ./charts/argo-cd/env/argo-defaults.yml
 
+helm upgrade --install metallb ./charts/metallb \
+--namespace metallb-system --create-namespace \
+--values ./charts/metallb/env/metallb-defaults.yml
+
+helm upgrade --install istio-base ./charts/istio-base \
+--namespace istio-system --create-namespace \
+--values ./charts/istio-base/env/istio-base-defaults.yml
+
+helm upgrade --install istio-cni ./charts/istio-cni \
+--namespace istio-system --create-namespace \
+--values ./charts/istio-cni/env/istio-cni-defaults.yml --wait
+
+helm upgrade --install istio-istiod ./charts/istio-istiod \
+--namespace istio-system --create-namespace \
+--values ./charts/istio-istiod/env/istio-istiod-defaults.yml --wait
+
+helm upgrade --install istio-gateway ./charts/istio-gateway \
+--namespace istio-ingress --create-namespace \
+--values ./charts/istio-gateway/env/istio-gateway-defaults.yml --wait
+
+helm upgrade --install kube-prometheus-stack ./charts/kube-prometheus-stack \
+--namespace monitoring --create-namespace \
+--values ./charts/kube-prometheus-stack/env/kube-prometheus-stack-defaults.yml --wait
+
+helm upgrade --install kiali-operator ./charts/kiali-operator \
+--namespace kiali-operator --create-namespace \
+--values ./charts/kiali-operator/env/kiali-operator-defaults.yml --wait
+
+helm upgrade --install kiali-server ./charts/kiali-server \
+--namespace istio-system --create-namespace \
+--values ./charts/kiali-server/env/kiali-server-defaults.yml --wait
+
+helm upgrade --install master-gateway ./charts/applications-gateway \
+--namespace istio-ingress --create-namespace \
+--values ./charts/applications-gateway/values.yaml --wait
+
+helm upgrade --install cert-manager ./charts/cert-manager \
+--namespace cert-manager --create-namespace \
+--values ./charts/cert-manager/env/cert-manager-defaults.yml --wait

@@ -153,7 +153,11 @@ tenant:
       storageLabels: { }
       ###
       # Specify `annotations <https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/>`__ to associate to Tenant pods.
-      annotations: { }
+      annotations:
+        prometheus.io/path: /minio/v2/metrics/cluster
+        prometheus.io/port: "9000"
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: "http"
       ###
       # Specify `labels <https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/>`__ to associate to Tenant pods.
       labels: { }
@@ -239,7 +243,7 @@ tenant:
   ###
   # Configures a Prometheus-compatible scraping endpoint at the specified port.
   metrics:
-    enabled: false
+    enabled: true
     port: 9000
     protocol: http
   ###

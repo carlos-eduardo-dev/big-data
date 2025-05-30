@@ -1,0 +1,37 @@
+{{- range .Values.virtualServices }}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ .name }}-virtualservice
+  namespace: {{ .namespace | default $.Release.Namespace }}
+spec:
+  hosts:
+    {{- range .hosts }}
+    - {{ . | quote }}
+    {{- end }}
+  gateways:
+    - {{ .gateway | default (include "gateway.fullname" $) }}
+  http:
+    - match:
+        - uri:
+            prefix: {{ .prefix }}
+      {{- if .rewrite }}
+      rewrite:
+        uri: {{ .rewrite.uri }}
+        authority: {{ .rewrite.authority }}
+      {{- end }}
+      {{- if .redirect }}
+      redirect:
+        scheme: {{ .redirect.scheme }}
+        redirectCode: {{ .redirect.redirectCode }}
+        authority: {{ .redirect.authority }}
+        uri: {{ .redirect.uri }}
+      {{- else }}
+      route:
+        - destination:
+            host: {{ .destination.host }}
+            port:
+              number: {{ .destination.port }}
+      {{- end }}
+---
+{{- end }}

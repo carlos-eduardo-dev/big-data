@@ -15,7 +15,9 @@ stringData:
   config.env: |-
     export MINIO_ROOT_USER={{ .Values.tenant.configSecret.accessKey | quote }}
     export MINIO_ROOT_PASSWORD={{ .Values.tenant.configSecret.secretKey | quote }}
-
+    export MINIO_SITE_REGION=local
+    export MINIO_SITE_NAME=big-data
+    export MINIO_PROMETHEUS_AUTH_TYPE=public
 {{- end }}
 {{- end }}
 {{- end }}

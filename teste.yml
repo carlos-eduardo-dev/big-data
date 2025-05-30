@@ -1,0 +1,19 @@
+apiVersion: app.redislabs.com/v1
+kind: RedisEnterpriseCluster
+metadata:
+  name: rec
+  namespace: redis-operator
+spec:
+  nodes: 1
+---
+apiVersion: app.redislabs.com/v1alpha1
+kind: RedisEnterpriseDatabase
+metadata:
+  name: redb
+  namespace: redis-operator
+spec:
+  memorySize: 100MB
+  replication: false
+  persistence: disabled
+  redisEnterpriseCluster:
+    name: rec

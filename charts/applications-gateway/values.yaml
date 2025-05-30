@@ -1,0 +1,95 @@
+gateway:
+  selector: gateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      tls:
+        httpsRedirect: true
+      hosts:
+        - "*.kubernetes.lan"
+        - "kubernetes.lan"
+
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: wildcard-cert
+      hosts:
+        - "*.kubernetes.lan"
+        - "kubernetes.lan"
+
+virtualServices:
+  - name: catchall
+    hosts:
+      - "*"
+    prefix: /
+    redirect:
+      authority: kiali.kubernetes.lan
+      uri: /
+
+  - name: argo-cd
+    namespace: argo
+    hosts:
+      - "argo.kubernetes.lan"
+    prefix: /
+    destination:
+      host: argo-argocd-server.argo.svc.cluster.local
+      port: 80
+
+  - name: grafana
+    namespace: monitoring
+    hosts:
+      - "grafana.kubernetes.lan"
+    prefix: /
+    destination:
+      host: kube-prometheus-stack-grafana.monitoring.svc.cluster.local
+      port: 80
+
+  - name: kiali
+    namespace: istio-system
+    hosts:
+      - "kiali.kubernetes.lan"
+    prefix: /
+    destination:
+      host: kiali.istio-system.svc.cluster.local
+      port: 20001
+      
+  - name: longhorn
+    namespace: longhorn-system
+    hosts:
+      - "longhorn.kubernetes.lan"
+    prefix: /
+    destination:
+      host: longhorn-frontend.longhorn-system.svc.cluster.local
+      port: 80
+
+  - name: local-minio-tenant-console
+    namespace: local-minio-tenant
+    hosts:
+      - "local-minio.kubernetes.lan"
+    prefix: /
+    destination:
+      host: local-minio-tenant-console.local-minio-tenant.svc.cluster.local
+      port: 9090
+
+  - name: postgres-operator-ui
+    namespace: postgres-operator
+    hosts:
+      - "postgres.kubernetes.lan"
+    prefix: /
+    destination:
+      host: postgres-operator-ui.postgres-operator.svc.cluster.local
+      port: 80
+
+  - name: redis-operator
+    namespace: redis-operator
+    hosts:
+      - "redis.kubernetes.lan"
+    prefix: /
+    destination:
+      host: rec-ui.redis-operator.svc.cluster.local
+      port: 8443

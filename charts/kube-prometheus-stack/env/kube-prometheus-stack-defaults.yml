@@ -1219,6 +1219,74 @@ grafana:
   enabled: true
   namespaceOverride: ""
 
+  grafana.ini:
+    sections:
+      vars:
+        DS_PROMETHEUS:
+          label: Prometheus
+          datasource: prometheus
+          refresh: 1
+          type: prometheus
+
+  dashboards:
+    istio-provider:
+      istio-control-plane-dashboard:
+        gnetId: 7645
+        revision: latest
+        datasource: Prometheus
+      istio-performance-dashboard:
+        gnetId: 11829
+        revision: latest
+        datasource: Prometheus
+      istio-mesh-dashboard:
+        gnetId: 7639
+        revision: latest
+        datasource: Prometheus
+      istio-service-dashboard:
+        gnetId: 7636
+        revision: latest
+        datasource: Prometheus
+      istio-wasm-extension-dashboard:
+        gnetId: 13277
+        revision: latest
+        datasource: Prometheus
+    minio-provider:
+      minio-bucket-dashboard:
+        gnetId: 19237
+        revision: latest
+        datasource: prometheus
+      minio-dashboard:
+        gnetId: 13502
+        revision: latest
+        datasource: prometheus
+      minio-replication-dashboard:
+        gnetId: 15305
+        revision: latest
+        datasource: prometheus
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'istio-provider'
+          orgId: 1
+          folder: 'Istio'
+          type: file
+          updateIntervalSeconds: 10
+          disableDeletion: true
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/istio-provider
+        - name: 'minio-provider'
+          orgId: 1
+          folder: 'Minio'
+          type: file
+          updateIntervalSeconds: 10
+          disableDeletion: true
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/minio-provider
+
+
   ## ForceDeployDatasources Create datasource configmap even if grafana deployment has been disabled
   ##
   forceDeployDatasources: false
@@ -1291,7 +1359,7 @@ grafana:
   defaultDashboardsInterval: 1m
 
   adminUser: admin
-  adminPassword: prom-operator
+  adminPassword: admin
 
   rbac:
     ## If true, Grafana PSPs will be created
@@ -4344,7 +4412,53 @@ prometheus:
     ## The scrape configuration example below will find master nodes, provided they have the name .*mst.*, relabel the
     ## port to 2379 and allow etcd scraping provided it is running on all Kubernetes master nodes
     ##
-    additionalScrapeConfigs: []
+    additionalScrapeConfigs:
+      - job_name: 'kubernetes-pods'
+        honor_labels: true
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_scrape ]
+            action: keep
+            regex: true
+          - source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow ]
+            action: drop
+            regex: true
+          - source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_scheme ]
+            action: replace
+            regex: (https?)
+            target_label: __scheme__
+          - source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_path ]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_port, __meta_kubernetes_pod_ip ]
+            action: replace
+            regex: (\d+);(([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})
+            replacement: '[$2]:$1'
+            target_label: __address__
+          - source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_port, __meta_kubernetes_pod_ip ]
+            action: replace
+            regex: (\d+);((([0-9]+?)(\.|$)){4})
+            replacement: $2:$1
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [ __meta_kubernetes_namespace ]
+            action: replace
+            target_label: namespace
+          - source_labels: [ __meta_kubernetes_pod_name ]
+            action: replace
+            target_label: pod
+          - source_labels: [ __meta_kubernetes_pod_phase ]
+            regex: Pending|Succeeded|Failed|Completed
+            action: drop
+          - source_labels: [ __meta_kubernetes_pod_node_name ]
+            action: replace
+            target_label: node
     # - job_name: kube-etcd
     #   kubernetes_sd_configs:
     #     - role: node
